@@ -1,0 +1,21 @@
+{
+    "name": "meliorator/yii2-picturizer",
+    "description": "Yii-Framework extension for uploading and cropping images",
+    "type": "yii2-extension",
+    "keywords": ["yii2","extension"," jcrop"," image","crop"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Laba Mykola",
+            "email": "laba2005@gmail.com"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "meliorator\\picturizer\\": ""
+        }
+    }
+}
