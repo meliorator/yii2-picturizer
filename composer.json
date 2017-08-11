@@ -17,5 +17,11 @@
         "psr-4": {
             "meliorator\\picturizer\\": ""
         }
+    },
+    "repositories":[
+    {
+        "type": "git",
+        "url": "https://github.com/meliorator/yii2-picturizer.git"
     }
+]
 }
