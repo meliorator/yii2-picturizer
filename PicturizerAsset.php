@@ -14,6 +14,10 @@ class PicturizerAsset extends AssetBundle {
 
     public $sourcePath = '@vendor/meliorator/yii2-picturizer/assets';
 
+    public $css = [
+        'css/picturizer.css'
+    ];
+
     public $js = [
         'js/picturizer.js'
     ];
@@ -23,6 +27,7 @@ class PicturizerAsset extends AssetBundle {
      */
     public $depends = [
         'yii\web\JqueryAsset',
+        'meliorator\picturizer\JCropAsset',
 //        'yii\bootstrap\BootstrapAsset',
     ];
 

@@ -9,14 +9,30 @@ namespace meliorator\picturizer;
 
 
 //use yii\base\Widget;
+use yii\base\Model;
+use yii\base\Widget;
 use yii\widgets\InputWidget;
+use yii\helpers\Json;
+use yii\base\InvalidConfigException;
 
-class Picturizer extends InputWidget {
+class Picturizer extends Widget {
 
     public $defaultImageUrl = '';
     public $previewImageUrl = '';
-    public $width = 200;
-    public $height = 200;
+    public $minWidth = 256;
+    public $minHeight = 256;
+    public $pluginOptions = [];
+
+    public $modelClass = 'meliorator\picturizer\PicturizerModel';
+
+    /** @var  PicturizerModel */
+    public $model;
+
+    public function init() {
+        $this->model = \Yii::createObject(['class' => $this->modelClass]);
+
+        parent::init();
+    }
 
     public function run(){
         $view = $this->getView();
@@ -24,15 +40,18 @@ class Picturizer extends InputWidget {
         $assets = PicturizerAsset::register($view);
 
         if ($this->defaultImageUrl === '') {
-            $this->defaultImageUrl = $assets->baseUrl . '/img/user.svg';
+            $this->defaultImageUrl = $assets->baseUrl . '/img/user.png';
         }
 
         if ($this->previewImageUrl === '') {
             $this->previewImageUrl = $this->defaultImageUrl;
         }
 
+        $options = Json::encode($this->pluginOptions);
+
+
         $js=<<<JS
-jQuery("#{$this->options['id']}").parent().find(".new-photo-area").cropper();
+jQuery("#{$this->getId()}").picturizer({$options}, {$this->minWidth}, {$this->minHeight});
 JS;
 
         $view->registerJs($js, $view::POS_READY);
