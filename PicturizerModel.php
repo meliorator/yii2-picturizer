@@ -35,9 +35,10 @@ class PicturizerModel extends Model {
     /** @var  int */
     public $viewWidth;
 
-    public function rules(){
+    public function rules() {
         return [
-            [['widthImageFile', 'heightImageFile', 'topImageFile', 'leftImageFile', 'viewHeight', 'viewWidth'], 'integer']
+            [['widthImageFile', 'heightImageFile', 'topImageFile', 'leftImageFile', 'viewHeight', 'viewWidth'], 'integer'],
+            [['uploadImageFile'], 'file', 'extensions' => 'png, jpg, jpeg', 'maxSize' => 8*1024*1024]
         ];
     }
 
@@ -47,25 +48,20 @@ class PicturizerModel extends Model {
      * @return bool
      */
     public function uploadImageTo($savePath) {
-//        if ($model->validateImage()) {
         $errorMessage = 'Upload filed';
         $isCreated = FileHelper::createDirectory($savePath);
         if ($isCreated && $this->uploadImageFile) {
-//                $path = $this->getImagePath();
             $fileName = FileHelper::getFileNameUnique($savePath, $this->uploadImageFile->baseName, $this->uploadImageFile->extension);
             if ($this->uploadImageFile->saveAs($savePath . '/' . $fileName)) {
                 return [true, $fileName];
-//                    $this->imageFileName = $fileName;
-//                    return $this->imageFileName;
             }
         } else {
-            $errorMessage = 'Failed created directory '.$savePath;
+            $errorMessage = 'Failed created directory ' . $savePath;
         }
-//        }
         return [false, $errorMessage];
     }
 
-    public function getRealCropParameters($imageH, $imageW){
+    public function getRealCropParameters($imageH, $imageW) {
         $realH = round((($this->heightImageFile * $imageH) / $this->viewHeight), 0);
         $realW = round((($this->widthImageFile * $imageW) / $this->viewWidth), 0);
         $realX = round((($this->leftImageFile * $imageW) / $this->viewWidth), 0);

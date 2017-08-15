@@ -23,7 +23,7 @@ to the require section of your `composer.json` file.
 
 Differences another extensions for JCrop library
 ---------------------------------
-Picturizer does not use the ajax-simple-upload-button or other ajax upload methods. Picturizer use only the HTTP POST method for upload files.
+Picturizer does not use the ajax-simple-upload-button or another ajax upload methods. Picturizer use only the HTTP POST method for upload files.
 
 Usage
 -----
@@ -31,19 +31,27 @@ Usage
 Once the extension is installed, simply use it in your code by :
 
 ```php
-<?= \meliorator\picturizer\Picturizer::widget(); ?>```
+<?= \meliorator\picturizer\Picturizer::widget(); ?>
+```
 
-
-and need attach behavior meliorator\picturizer\PicturizerControllerBehavior to controller. Example :
+and need attach behavior PicturizerControllerBehavior to controller. Example :
 
 
 ```php
-<?php  return [                
+use meliorator\picturizer\PicturizerControllerBehavior;
+```
+```php
+ return [                
                 'avatar' => [
                     'class' => PicturizerControllerBehavior::className(),
                     'savePath' => '@webroot/images/employees' 
                 ]
             ];
-         ?>```
+         
+```
+and call saveUploadedImage method for save image :
+```php
+$newFileName = $this->saveUploadedImage();
+```
         
  

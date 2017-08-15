@@ -21,6 +21,29 @@ class PicturizerControllerBehavior extends Behavior {
 
     public $savePath;
 
+    public $modelClass = 'meliorator\picturizer\PicturizerModel';
+
+    /** @var PicturizerModel */
+    private $model;
+
+    private $_valid = false;
+
+    /**
+     * @return bool
+     */
+    public function isValidModel() {
+        return $this->_valid;
+    }
+
+    private $_errorsValidation = [];
+
+    /**
+     * @return array
+     */
+    public function getErrorsValidation() {
+        return $this->_errorsValidation;
+    }
+
     public function init() {
         if (!$this->savePath) {
             throw new CommonException('Property savePath is not defined.');
@@ -28,30 +51,35 @@ class PicturizerControllerBehavior extends Behavior {
         parent::init();
     }
 
+    public function validateFile(){
+        if(!$this->model){
+            $this->initModel();
+        }
+
+        $this->_valid = $this->model->validate();
+        $this->_errorsValidation = $this->model->getErrors();
+        return $this->isValidModel();
+    }
+
     public function saveUploadedImage() {
         if (\Yii::$app->request->isPost) {
-            $model = new PicturizerModel();
-            $model->load(\Yii::$app->request->post());
 
-            $model->uploadImageFile = UploadedFile::getInstance($model, 'uploadImageFile');
-            list($success, $fileName) = $model->uploadImageTo($this->getImagePath());
+            if(!$this->model){
+                $this->initModel();
+            }
+
+            list($success, $fileName) = $this->model->uploadImageTo($this->getImagePath());
             if ($success) {
                 $filePath = $this->getImagePath() . '/' . $fileName;
 
                 $imagine = new \Imagine\Imagick\Imagine();
                 $image = $imagine->open($filePath);
                 $size = $image->getSize();
-                list($realH, $realW, $realX, $realY) = $model->getRealCropParameters($size->getHeight(), $size->getWidth());
+                list($realH, $realW, $realX, $realY) = $this->model->getRealCropParameters($size->getHeight(), $size->getWidth());
                 $image
                     ->copy()
                     ->crop(new Point($realX, $realY), new Box($realW, $realH))
                     ->save($filePath);
-//                $ff = Image::crop(
-//                    $filePath,
-//                    (int)$model->widthImageFile,
-//                    (int)$model->heightImageFile,
-//                    [(int)$model->leftImageFile, (int)$model->topImageFile]
-//                );//->save($filePath);
 
                 return $fileName;
             }
@@ -62,6 +90,13 @@ class PicturizerControllerBehavior extends Behavior {
 
     public function getImagePath($withFileName = false) {
         return \Yii::getAlias($this->savePath);
+    }
+
+    private function initModel(){
+        $this->model = \Yii::createObject(['class' => $this->modelClass]);
+        $this->model->load(\Yii::$app->request->post());
+
+        $this->model->uploadImageFile = UploadedFile::getInstance($this->model, 'uploadImageFile');
     }
 
     private function save(){

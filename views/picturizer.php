@@ -3,8 +3,14 @@
 /** @var \meliorator\picturizer\Picturizer $widget */
 
 use yii\helpers\Html;
-// Html::img($widget->previewImageUrl, ['class' => 'preview img-responsive img-thumbnail']);
-$model = new \meliorator\picturizer\PicturizerModel()
+
+$errors = '';
+if($widget->model->hasErrors()){
+    foreach ($widget->model->getErrors() as $error) {
+        $errors .= implode($error);
+    }
+}
+
 ?>
 <div id="<?= $widget->getId() ?>" class="crop-wrapper">
 
@@ -18,6 +24,15 @@ $model = new \meliorator\picturizer\PicturizerModel()
     <div class="crop-preview">
         <?= Html::img($widget->previewImageUrl, ['class' => 'preview img-responsive']); ?>
     </div>
+
+    <?php if($errors): ?>
+        <p class="text-danger"><?= $errors; ?></p>
+    <?php endif ?>
+
+    <?php if($widget->restrictText): ?>
+        <p class="text-info"><?= $widget->restrictText; ?></p>
+    <?php endif ?>
+
     <div class="crop-action">
         <?= Html::activeFileInput($widget->model, 'uploadImageFile'); ?>
     </div>

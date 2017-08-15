@@ -11,6 +11,7 @@ namespace meliorator\picturizer;
 //use yii\base\Widget;
 use yii\base\Model;
 use yii\base\Widget;
+use yii\web\Controller;
 use yii\widgets\InputWidget;
 use yii\helpers\Json;
 use yii\base\InvalidConfigException;
@@ -22,6 +23,7 @@ class Picturizer extends Widget {
     public $minWidth = 256;
     public $minHeight = 256;
     public $pluginOptions = [];
+    public $restrictText = '';
 
     public $modelClass = 'meliorator\picturizer\PicturizerModel';
 
@@ -30,7 +32,16 @@ class Picturizer extends Widget {
 
     public function init() {
         $this->model = \Yii::createObject(['class' => $this->modelClass]);
-
+        /** @var Controller | PicturizerControllerBehavior $controller */
+        $controller = \Yii::$app->controller;
+        $behaviors = $controller->getBehaviors();
+        foreach ($behaviors as $behavior) {
+            if($behavior instanceof PicturizerControllerBehavior){
+                if(!$controller->isValidModel()){
+                    $this->model->addErrors($controller->getErrorsValidation());
+                }
+            }
+        }
         parent::init();
     }
 
