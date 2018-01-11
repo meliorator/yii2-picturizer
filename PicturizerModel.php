@@ -10,7 +10,7 @@ namespace meliorator\picturizer;
 
 use app\components\Utils;
 use yii\base\Model;
-
+use meliorator\helpers\FileHelper;
 
 class PicturizerModel extends Model {
 
