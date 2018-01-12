@@ -13,6 +13,8 @@ use Imagine\Image\Box;
 use Imagine\Image\Point;
 use yii\base\Behavior;
 use yii\base\InvalidCallException;
+use yii\base\UnknownPropertyException;
+use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
 use yii\imagine\Image;
 use yii\web\UploadedFile;
@@ -61,7 +63,7 @@ class PicturizerControllerBehavior extends Behavior {
         return $this->isValidModel();
     }
 
-    public function saveUploadedImage() {
+    public function saveUploadedImage($operation = []) {
         if (\Yii::$app->request->isPost) {
 
             if(!$this->model){
@@ -72,14 +74,26 @@ class PicturizerControllerBehavior extends Behavior {
             if ($success) {
                 $filePath = $this->getImagePath() . '/' . $fileName;
 
-                $imagine = new \Imagine\Imagick\Imagine();
-                $image = $imagine->open($filePath);
-                $size = $image->getSize();
-                list($realH, $realW, $realX, $realY) = $this->model->getRealCropParameters($size->getHeight(), $size->getWidth());
-                $image
-                    ->copy()
-                    ->crop(new Point($realX, $realY), new Box($realW, $realH))
-                    ->save($filePath);
+                $op = ArrayHelper::getValue($operation, 'op', 'crop');
+                if($op === 'crop'){
+                    $imagine = new \Imagine\Imagick\Imagine();
+                    $image = $imagine->open($filePath);
+                    $size = $image->getSize();
+                    list($realH, $realW, $realX, $realY) = $this->model->getRealCropParameters($size->getHeight(), $size->getWidth());
+                    $image
+                        ->copy()
+                        ->crop(new Point($realX, $realY), new Box($realW, $realH))
+                        ->save($filePath);
+                }
+
+                if($op === 'thumbnail'){
+                    $newSize = ArrayHelper::getValue($operation, 'size', []);
+                    if(!$newSize){
+                        throw new UnknownPropertyException('size parameter not found');
+                    }
+                    list($width, $height) = $newSize;
+                    Image::getImagine()->open($filePath)->thumbnail(new Box($width, $height))->save($filePath);
+                }
 
                 return $fileName;
             }

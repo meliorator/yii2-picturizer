@@ -40,10 +40,6 @@
                                 alert('Image need biggest');
                                 return false;
                             }
-                            // var x1 = (this.width - width) / 2;
-                            // var y1 = (this.height - height) / 2;
-                            // var x2 = x1 + width;
-                            // var y2 = y1 + height;
 
                             picturizer.initPreview();
                         };
@@ -55,12 +51,12 @@
                             picturizer.reader.readAsDataURL(this.files[0]);
                         }
                     });
-
-                    // picturizer.initPreview();
                 },
 
                 initPreview: function () {
-                    picturizer.$preview.Jcrop(settings);
+                    if(settings['withoutCrop'] == undefined){
+                        picturizer.$preview.Jcrop(settings);
+                    }
 
                     picturizer.$viewHeight.val(picturizer.$preview.height());
                     picturizer.$viewWidth.val(picturizer.$preview.width());
@@ -68,9 +64,12 @@
 
                 clearPreview: function () {
                     if (picturizer.$preview) {
-                        var jCrop = picturizer.$preview.data('Jcrop');
-                        if(jCrop != undefined){
-                            jCrop.destroy();
+
+                        if(settings['withoutCrop'] == undefined){
+                            var jCrop = picturizer.$preview.data('Jcrop');
+                            if(jCrop != undefined){
+                                jCrop.destroy();
+                            }
                         }
 
                         picturizer.$preview.remove();

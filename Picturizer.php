@@ -25,6 +25,9 @@ class Picturizer extends Widget {
     public $pluginOptions = [];
     public $restrictText = '';
 
+    /** @var bool Disable JCrop */
+    public $withoutCrop = false;
+
     public $modelClass = 'meliorator\picturizer\PicturizerModel';
 
     /** @var  PicturizerModel */
@@ -56,6 +59,10 @@ class Picturizer extends Widget {
 
         if ($this->previewImageUrl === '') {
             $this->previewImageUrl = $this->defaultImageUrl;
+        }
+
+        if($this->withoutCrop){
+            $this->pluginOptions['withoutCrop'] = true;
         }
 
         $options = Json::encode($this->pluginOptions);
