@@ -70,6 +70,11 @@ class PicturizerControllerBehavior extends Behavior {
                 $this->initModel();
             }
 
+            $replacePath = ArrayHelper::getValue($operation, 'replace', '');
+            if($replacePath){
+                $this->savePath = strtr($this->savePath, $replacePath);
+            }
+
             list($success, $fileName) = $this->model->uploadImageTo($this->getImagePath());
             if ($success) {
                 $filePath = $this->getImagePath() . '/' . $fileName;
