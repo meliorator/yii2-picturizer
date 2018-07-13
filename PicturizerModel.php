@@ -35,11 +35,32 @@ class PicturizerModel extends Model {
     /** @var  int */
     public $viewWidth;
 
+    public $required = false;
+
+    public $extensions = 'png, jpg, jpeg';
+
+    public $maxFileSize = 8*1024*1024;
+
+    public $minWidth  = 400;
+    public $maxWidth = 2000;
+
+    public $minHeight = 400;
+    public $maxHeight = 2000;
+
     public function rules() {
-        return [
+        $rules = [
             [['widthImageFile', 'heightImageFile', 'topImageFile', 'leftImageFile', 'viewHeight', 'viewWidth'], 'integer'],
-            [['uploadImageFile'], 'file', 'extensions' => 'png, jpg, jpeg', 'maxSize' => 8*1024*1024]
+            [
+                ['uploadImageFile'], 'image', 'extensions' => $this->extensions, 'maxSize' => $this->maxFileSize,
+                'minWidth' => $this->minWidth, 'maxWidth' => $this->maxWidth,
+                'minHeight' => $this->minHeight, 'maxHeight' => $this->maxHeight,
+            ],
+
         ];
+        if($this->required){
+            $rules[] = [['uploadImageFile'], 'required'];
+        }
+        return $rules;
     }
 
     /**

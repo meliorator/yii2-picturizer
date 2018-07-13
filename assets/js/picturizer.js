@@ -1,10 +1,13 @@
 (function () {
     "use strict";
-    $.fn.picturizer = function (options, minW, minH) {
+    $.fn.picturizer = function (jCropOptions, commonOptions) {
 
         var $wrapper = $(this),
 
-            settings = $.extend({
+            minW = commonOptions['minWidth'],
+            minH = commonOptions['minHeight'],
+
+            jCropsettings = $.extend({
                 aspectRatio: 1,
                 bgColor: 'white',
                 bgOpacity: 0.3,
@@ -16,7 +19,12 @@
                     $wrapper.find('input.width').val(c.w);
                     $wrapper.find('input.height').val(c.h);
                 }
-            }, options),
+            }, jCropOptions),
+
+            commonSettings = $.extend({
+                previewMaxHeight: 0,
+                previewMaxWidth:0
+            },commonOptions),
 
             picturizer = {
                 reader: null,
@@ -31,6 +39,14 @@
                         picturizer.clearPreview();
                         picturizer.$previewWrapper.append('<img src="' + e.target.result + '" class="preview preview img-responsive">');
                         picturizer.$preview = picturizer.$previewWrapper.find('.preview');
+
+                        if(commonSettings.previewMaxHeight > 0){
+                            picturizer.$preview.css('max-height', commonSettings.previewMaxHeight);
+                        }
+
+                        if(commonSettings.previewMaxWidth > 0){
+                            picturizer.$preview.css('max-width', commonSettings.previewMaxWidth);
+                        }
 
                         var image = new Image();
                         image.src = e.target.result;
@@ -54,8 +70,8 @@
                 },
 
                 initPreview: function () {
-                    if(settings['withoutCrop'] == undefined){
-                        picturizer.$preview.Jcrop(settings);
+                    if(jCropsettings['withoutCrop'] == undefined){
+                        picturizer.$preview.Jcrop(jCropsettings);
                     }
 
                     picturizer.$viewHeight.val(picturizer.$preview.height());
@@ -65,7 +81,7 @@
                 clearPreview: function () {
                     if (picturizer.$preview) {
 
-                        if(settings['withoutCrop'] == undefined){
+                        if(jCropsettings['withoutCrop'] == undefined){
                             var jCrop = picturizer.$preview.data('Jcrop');
                             if(jCrop != undefined){
                                 jCrop.destroy();

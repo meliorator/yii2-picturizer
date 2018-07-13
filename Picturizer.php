@@ -11,6 +11,7 @@ namespace meliorator\picturizer;
 //use yii\base\Widget;
 use yii\base\Model;
 use yii\base\Widget;
+use yii\helpers\ArrayHelper;
 use yii\web\Controller;
 use yii\widgets\InputWidget;
 use yii\helpers\Json;
@@ -20,10 +21,17 @@ class Picturizer extends Widget {
 
     public $defaultImageUrl = '';
     public $previewImageUrl = '';
-    public $minWidth = 256;
-    public $minHeight = 256;
+
+    public $minWidth = 400;
+    public $minHeight = 400;
+    public $maxFileSize = 8 * 1024 * 1024;
+    public $extensions = 'png, jpg, jpeg';
+
     public $pluginOptions = [];
     public $restrictText = '';
+
+    public $previewMaxHeight;
+    public $previewMaxWidth;
 
     /** @var bool Disable JCrop */
     public $withoutCrop = false;
@@ -32,15 +40,23 @@ class Picturizer extends Widget {
 
     /** @var  PicturizerModel */
     public $model;
+    public $modelOptions = [];
 
     public function init() {
-        $this->model = \Yii::createObject(['class' => $this->modelClass]);
+        $attributes = ArrayHelper::merge(
+            ['class' => $this->modelClass],
+            [
+                'minWidth' => $this->minWidth, 'minHeight' => $this->minHeight,
+                'maxFileSize' => $this->maxFileSize, 'extensions' => $this->extensions
+            ],
+            $this->modelOptions);
+        $this->model = \Yii::createObject($attributes);
         /** @var Controller | PicturizerControllerBehavior $controller */
         $controller = \Yii::$app->controller;
         $behaviors = $controller->getBehaviors();
         foreach ($behaviors as $behavior) {
-            if($behavior instanceof PicturizerControllerBehavior){
-                if(!$controller->isValidModel()){
+            if ($behavior instanceof PicturizerControllerBehavior) {
+                if (!$controller->isValidModel()) {
                     $this->model->addErrors($controller->getErrorsValidation());
                 }
             }
@@ -48,7 +64,7 @@ class Picturizer extends Widget {
         parent::init();
     }
 
-    public function run(){
+    public function run() {
         $view = $this->getView();
 
         $assets = PicturizerAsset::register($view);
@@ -61,15 +77,27 @@ class Picturizer extends Widget {
             $this->previewImageUrl = $this->defaultImageUrl;
         }
 
-        if($this->withoutCrop){
+        if ($this->withoutCrop) {
             $this->pluginOptions['withoutCrop'] = true;
         }
 
-        $options = Json::encode($this->pluginOptions);
+        $jcropOptions = Json::encode($this->pluginOptions);
 
+        $base = ['minWidth' => $this->minWidth, 'minHeight' => $this->minHeight];
 
-        $js=<<<JS
-jQuery("#{$this->getId()}").picturizer({$options}, {$this->minWidth}, {$this->minHeight});
+        if ($this->previewMaxHeight) {
+            $base['previewMaxHeight'] = $this->previewMaxHeight;
+        }
+
+        if ($this->previewMaxWidth) {
+            $base['previewMaxWidth'] = $this->previewMaxWidth;
+        }
+
+        $commonOptions = Json::encode($base);
+
+        $js
+            = <<<JS
+jQuery("#{$this->getId()}").picturizer({$jcropOptions}, {$commonOptions});
 JS;
 
         $view->registerJs($js, $view::POS_READY);
